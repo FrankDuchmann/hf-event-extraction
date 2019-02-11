@@ -1,0 +1,34 @@
+{
+  "name": "hf-event-extraction",
+  "version": "1.0.0",
+  "description": "allows the extraction of meaningful events of blockchain data",
+  "main": "event-extraction/getProcessLog.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrankDuchmann/hf-event-extraction.git"
+  },
+  "keywords": [
+    "process",
+    "mining",
+    "blockchain",
+    "etl",
+    "event",
+    "extraction"
+  ],
+  "author": "Frank Duchmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FrankDuchmann/hf-event-extraction/issues"
+  },
+  "homepage": "https://github.com/FrankDuchmann/hf-event-extraction#readme",
+  "devDependencies": {
+    "colors": "^1.3.3",
+    "composer-admin": "^0.20.7",
+    "composer-client": "^0.20.7",
+    "papaparse": "^4.6.3",
+    "stream-json": "^1.1.4"
+  }
+}

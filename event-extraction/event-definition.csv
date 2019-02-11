@@ -1,0 +1,2 @@
+EventLevel; EventName; Definition or Expression
+eventLevel3;Andy has a car; [owner = resource:org\.acme\.vehicle_network.* > resource:org.acme.vehicle_network.Person#Andy]
