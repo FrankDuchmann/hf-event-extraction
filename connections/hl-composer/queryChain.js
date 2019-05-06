@@ -5,17 +5,16 @@ const BusinessNetworkConnection = require('composer-client').BusinessNetworkConn
 const AdminConnection = require('composer-admin').AdminConnection;
 const fs = require('fs');
 
+
+
 // =====================
 //    GLOBAL SETTINGS
 // =====================
 let channel;
 let json_path = __dirname;
 let connectionCard = "admin@vehicle-manufacture-network";
+let exportFileName = "vehicle-manufacture-network-blocks";
 
-// Set export file
-var exportFile = {
-    blocks: []
- };
 
 // =====================
 //       FUNCTIONS
@@ -59,8 +58,10 @@ async function init() {
 
 // query all Blocks
 async function queryBlocks() {
+    let exportFile = {
+        blocks: []
+    };
     let query_response = await channel.queryInfo();
-    //console.log("Result", query_response);
     console.log("Blockchain is ", query_response.height.toString() , " blocks long");
     let latestBlockNumber = parseInt(query_response.height.toString());
 
@@ -75,12 +76,12 @@ async function queryBlocks() {
 
         exportFile.blocks.push(_block);
     }
-    writeBlocks();
+    writeBlocks(exportFile);
 }
 
-async function writeBlocks() {
+async function writeBlocks(exportFile) {
     var json = JSON.stringify(exportFile);
-    fs.writeFile(json_path + '/data/blocks.json', json, (err) => {  
+    fs.writeFile(json_path + '/data/' + exportFileName  + '.json', json, (err) => {  
         // throws an error, you could also catch it here
         if (err) throw err;
     
@@ -88,6 +89,7 @@ async function writeBlocks() {
         console.log('All Blocks Saved');
     });
 }
+
 
 
 // =====================
