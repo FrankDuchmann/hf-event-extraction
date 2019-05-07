@@ -1,2 +1,4 @@
-EventLevel; EventName; Definition or Expression
-eventLevel3;Andy has a car; [owner = resource:org\.acme\.vehicle_network.* > resource:org.acme.vehicle_network.Person#Andy]
+EventLevel; EventName; Definition
+eventLevel3;owner assigned; [owner = .* > .*]
+eventLevel3;vin assigned to car; [vin = .* > .*]
+eventLevel3;vehicleStatus changed to ACTIVE; [vehicleStatus = .* > ACTIVE]

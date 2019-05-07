@@ -537,34 +537,32 @@ async function sendRequests(items, url) {
 }
 
 async function main() {
-  console.log("sending orders...");
-  //sendRequests(orders, 'http://localhost:3000/api/org.acme.vehicle_network.PlaceOrder');
+  console.log("sending orders...".blue);
   sendRequests(orders, 'http://localhost:3000/api/org.acme.vehicle_network.PlaceOrder');
   await sleep(10000);
   console.log("done".green.bold);
 
-  console.log("change status to scheduled...");
-  //sendRequests(updateOrderStatus_scheduled, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
+  console.log("change status to scheduled...".blue);
   sendRequests(updateOrderStatus_scheduled, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
   await sleep(10000);
   console.log("done".green.bold);
 
-  console.log("change order status to vin assigned");
-  //sendRequests(updateOrderStatus_vin_assigned, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
+  console.log("change order status to vin assigned".blue);
+  sendRequests(updateOrderStatus_vin_assigned, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
   await sleep(10000);
   console.log("done".green.bold);
   
-  console.log("change order status to owner assigned");
+  console.log("change order status to owner assigned".blue);
   sendRequests(updateOrderStatus_owner_assigned, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
   await sleep(10000);
   console.log("done".green.bold);
 
-  console.log("change order status to delivered");
+  console.log("change order status to delivered".blue);
   sendRequests(UpdateOrderStatus_deliverd, 'http://localhost:3000/api/org.acme.vehicle_network.UpdateOrderStatus');
   await sleep(10000);
   console.log("done".green.bold);
 
-  console.log("Finished!".blue);
+  console.log("Finished!".bgBlue);
 }
 
 main();

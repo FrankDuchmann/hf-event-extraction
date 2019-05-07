@@ -120,7 +120,13 @@ function detectComplexEvents(_oldStructure, _newStructure) {
             let newValue = parts[j].match(/>(.*?)\]/)[1];
             let newValueEval = new RegExp(newValue, 'g').test(_newStructure[key]);
 
-            let expressionResult = oldValueEval && newValueEval;
+            let expressionResult;
+            if (_oldStructure[key] != _newStructure[key]) {
+                expressionResult = oldValueEval && newValueEval;
+            }
+            else {
+                expressionResult = false;
+            }
             eventDefinitionEval = eventDefinitionEval.replace(parts[j], expressionResult);
         }
         console.log(("  " + eventLabel + ": " + eval(eventDefinitionEval)).gray);
@@ -137,6 +143,7 @@ function detectComplexEvents(_oldStructure, _newStructure) {
             console.log(("  emmit complex event: " + eventLabel).cyan);
         }
     }
+
     console.log(" detect complex events ...".gray + " [done]".green);
     return result;
 }
@@ -186,7 +193,7 @@ function extract_events() {
         console.log("Inspecting Block " + currentBlockNumber + " [...]".white);
 
         console.log(currentBlock.data.data.length.toString().red.bold);
-        for(let l=0; l<currentBlock.data.data.length; l++){
+        for (let l = 0; l < currentBlock.data.data.length; l++) {
             let currentBlockData = currentBlock.data.data[l];
             let timeStamp = currentBlockData.payload.header.channel_header.timestamp;
             let channelId = currentBlockData.payload.header.channel_header.channel_id;
@@ -196,7 +203,7 @@ function extract_events() {
                 let input = currentBlockData.payload.data.actions[0].payload.chaincode_proposal_payload.input.chaincode_spec.input;
                 let endorser = currentBlockData.payload.data.actions[0].payload.action.endorsements[0].endorser.Mspid;
                 let creatorMSP = currentBlockData.payload.data.actions[0].header.creator.Mspid;
-    
+
                 for (let j = 0; j < actions.ns_rwset.length; j++) {
                     let currentNSRWSet = actions.ns_rwset[j];
                     let nameSpace = currentNSRWSet.namespace;
@@ -215,11 +222,11 @@ function extract_events() {
                             let composer_registry_type = null;
                             let composer_registry_type_class = null;
                             let skip_entry = false;
-    
+
                             let id = currentWrite.key.replace(/\0/g, '');
                             let isDelete = currentWrite.is_delete;
                             let value = (currentWrite.value != "") ? JSON.parse(currentWrite.value) : null;
-    
+
                             // composer specific attributes
                             if (type == "composer") {
                                 if (id.includes("Historian") || id.includes("org.hyperledger.composer.system") || id.includes("Transaction") || id.includes("$syscollections") || id.includes("$sysregistries")) {
@@ -229,29 +236,31 @@ function extract_events() {
                                 else {
                                     skip_entry = false;
                                 }
-    
+
                             }
                             else if (type == "fabric") {
                                 skip_entry = false;
                             }
-    
+
                             // Check objects and create events
                             if (skip_entry == false) {
                                 console.log((" Check Object with id=" + id).yellow)
+                                let complexEvents = [];
                                 if (structsId.indexOf(id) != -1) {
                                     // object exists -> UPDATED
                                     let oldStructure = allStructs.find(item => item.id == id).value;
+                                    let oldStructureIndex = allStructs.findIndex(item => item.id == id);
                                     let newStructure = value;
-                                    oldStructure = flattenObject(oldStructure);
-                                    newStructure = flattenObject(newStructure);
+                                    let oldStructureFlat = flattenObject(oldStructure);
+                                    let newStructureFlat = flattenObject(newStructure);
                                     let eventLevel2Stack = [];
                                     let eventLevel3Stack = [];
-                                    for (let key in newStructure) {
-                                        if (oldStructure[key] != newStructure[key]) {
+                                    for (let key in newStructureFlat) {
+                                        if (oldStructureFlat[key] != newStructureFlat[key]) {
                                             // value changed
-                                            console.log((" Property " + key + " changed from " + shortenKey(oldStructure[key], shortenDelimiter, shortenKeep) + " to " + shortenKey(newStructure[key], shortenDelimiter, shortenKeep)).magenta);
+                                            console.log((" Property " + key + " changed from " + shortenKey(oldStructureFlat[key], shortenDelimiter, shortenKeep) + " to " + shortenKey(newStructureFlat[key], shortenDelimiter, shortenKeep)).magenta);
                                             eventLevel2Stack.push(key);
-                                            eventLevel3Stack.push([key, oldStructure[key], newStructure[key]]);
+                                            eventLevel3Stack.push([key, oldStructureFlat[key], newStructureFlat[key]]);
                                         }
                                     }
                                     // Level 1
@@ -274,26 +283,72 @@ function extract_events() {
                                     }
                                     eventLevel3 = eventLevel3Stack.sort().join(', ');
                                     eventLevel3Id = getEventId(eventLevel3, eventLevel3Ids);
-    
+
                                     // detect complex events
-                                    let complexEvent = detectComplexEvents(oldStructure, newStructure);
-                                    console.log("Complex Event Return");
-                                    let x = null;
+                                    let complexEvent = detectComplexEvents(oldStructureFlat, newStructureFlat);
                                     if (complexEvent.length > 0) {
-                                        if (complexEvent[0].eventLevel == "eventLevel1") eventLevel1 = complexEvent[0].eventLabel;
-                                        if (complexEvent[0].eventLevel == "eventLevel2") eventLevel2 = complexEvent[0].eventLabel;
-                                        if (complexEvent[0].eventLevel == "eventLevel3") eventLevel3 = complexEvent[0].eventLabel;
+                                        complexEvent.forEach(function (item) {
+                                            if (item.eventLevel == "eventLevel1") eventLevel1 = item.eventLabel;
+                                            if (item.eventLevel == "eventLevel2") eventLevel2 = item.eventLabel;
+                                            if (item.eventLevel == "eventLevel3") eventLevel3 = item.eventLabel;
+
+                                            // Add Event to ProcessLog
+                                            processLog.push({
+                                                "key": id,
+                                                "timestamp": timeStamp,
+                                                "eventLevel1": eventLevel1,
+                                                "eventLevel1Id": eventLevel1Id,
+                                                "eventLevel2": eventLevel2,
+                                                "eventLevel2Id": eventLevel2Id,
+                                                "eventLevel3": eventLevel3,
+                                                "eventLevel3Id": eventLevel3Id,
+                                                "tx_id": transactionId,
+                                                "chaincode_id": nameSpace,
+                                                "block_number": currentBlockNumber,
+                                                "endorser": endorser,
+                                                "channelId": channelId,
+                                                "creatorMSP": creatorMSP,
+                                                "registryType": composer_registry_type, // optional
+                                                "assetClass": composer_registry_type_class // optional
+                                            });
+                                        })
                                     }
-    
-                                    // Logging to Console
-                                    console.log((" EventL1 " + eventLevel1).blue);
-                                    console.log((" EventL2 " + eventLevel2).blue);
-                                    console.log((" EventL3 " + eventLevel3).blue);
+                                    else {
+                                        //no complex Events
+
+                                        // Add Event to ProcessLog
+                                        processLog.push({
+                                            "key": id,
+                                            "timestamp": timeStamp,
+                                            "eventLevel1": eventLevel1,
+                                            "eventLevel1Id": eventLevel1Id,
+                                            "eventLevel2": eventLevel2,
+                                            "eventLevel2Id": eventLevel2Id,
+                                            "eventLevel3": eventLevel3,
+                                            "eventLevel3Id": eventLevel3Id,
+                                            "tx_id": transactionId,
+                                            "chaincode_id": nameSpace,
+                                            "block_number": currentBlockNumber,
+                                            "endorser": endorser,
+                                            "channelId": channelId,
+                                            "creatorMSP": creatorMSP,
+                                            "registryType": composer_registry_type, // optional
+                                            "assetClass": composer_registry_type_class // optional
+                                        });
+
+                                        // Logging to Console
+                                        console.log((" EventL1 " + eventLevel1).blue);
+                                        console.log((" EventL2 " + eventLevel2).blue);
+                                        console.log((" EventL3 " + eventLevel3).blue);
+                                    }
+
+                                    // overwrite oldStructure with newStructure
+                                    allStructs[oldStructureIndex].value = value;
                                 }
                                 else {
                                     // object does not exist -> CREATED
                                     // Level 1
-                                    if(type == "composer") {
+                                    if (type == "composer") {
                                         composer_registry_type = value.$registryType;
                                         composer_registry_type_class = value.$class;
                                         if (composer_registry_type == "Asset") eventLevel1 = "asset created";
@@ -304,23 +359,23 @@ function extract_events() {
                                     }
                                     eventLevel1Id = getEventId(eventLevel1, eventLevel1Ids);
                                     // Level 2
-                                    if(type == "composer"){
+                                    if (type == "composer") {
                                         eventLevel2 = shortenKey(composer_registry_type_class, shortenDelimiter, shortenKeep) + " created";
                                     }
                                     else {
                                         eventLevel2 = shortenKey(id, shortenDelimiter, shortenKeep) + " created";
-                                    }                                
+                                    }
                                     eventLevel2Id = getEventId(eventLevel2, eventLevel2Ids);
                                     // Level 3
-                                    if(type == "composer"){
-                                        if(composer_registry_type == "Asset") eventLevel3 = "asset - " + shortenKey(composer_registry_type_class, shortenDelimiter, shortenKeep) + " created";
-                                        if(composer_registry_type == "Participant") eventLevel3 = "participant - " + shortenKey(composer_registry_type_class, shortenDelimiter, shortenKeep) + " created";
+                                    if (type == "composer") {
+                                        if (composer_registry_type == "Asset") eventLevel3 = "asset - " + shortenKey(composer_registry_type_class, shortenDelimiter, shortenKeep) + " created";
+                                        if (composer_registry_type == "Participant") eventLevel3 = "participant - " + shortenKey(composer_registry_type_class, shortenDelimiter, shortenKeep) + " created";
                                     }
-                                    else{
+                                    else {
                                         eventLevel3 = "object created with";
                                     }
                                     eventLevel3Id = getEventId(eventLevel3, eventLevel3Ids);
-    
+
                                     // add to registry
                                     structsId.push(id);
                                     allStructs.push({
@@ -328,34 +383,13 @@ function extract_events() {
                                         "is_delete": isDelete,
                                         "value": value
                                     });
-    
+
                                     // Logging to Console
                                     console.log((" EventL1 " + eventLevel1).blue);
                                     console.log((" EventL2 " + eventLevel2).blue);
                                     console.log((" EventL3 " + eventLevel3).blue);
-    
+
                                 }
-    
-                                // Add Event to ProcessLog
-                                processLog.push({
-                                    "key": id,
-                                    "timestamp": timeStamp,
-                                    "eventLevel1": eventLevel1,
-                                    "eventLevel1Id": eventLevel1Id,
-                                    "eventLevel2": eventLevel2,
-                                    "eventLevel2Id": eventLevel2Id,
-                                    "eventLevel3": eventLevel3,
-                                    "eventLevel3Id": eventLevel3Id,
-                                    "tx_id": transactionId,
-                                    "chaincode_id": nameSpace,
-                                    "block_number": currentBlockNumber,
-                                    "endorser": endorser,
-                                    "channelId": channelId,
-                                    "creatorMSP": creatorMSP,
-                                    "registryType": composer_registry_type, // optional
-                                    "assetClass": composer_registry_type_class // optional
-                                });
-    
                             }
                         }
                     }
@@ -374,7 +408,7 @@ function extract_events() {
             console.log("-------------------------".white.bold);
             console.log("\n");
         }
-       
+
     }
     console.timeEnd("Iteration of Blocks");
 }
