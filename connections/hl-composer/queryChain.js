@@ -4,6 +4,7 @@
 const BusinessNetworkConnection = require('composer-client').BusinessNetworkConnection;
 const AdminConnection = require('composer-admin').AdminConnection;
 const fs = require('fs');
+const colors = require('colors');
 
 
 
@@ -13,7 +14,7 @@ const fs = require('fs');
 let channel;
 let json_path = __dirname;
 let connectionCard = "admin@vehicle-manufacture-network";
-let exportFileName = "vehicle-manufacture-network-blocks";
+let exportFileName = "vmn_blocks_error";
 
 
 // =====================
@@ -69,7 +70,7 @@ async function queryBlocks() {
         let _block = await channel.queryBlock(i, false, false);
 
         console.log("%c -------------", "color: blue");
-        console.log("Block " + i,);
+        console.log("%c Block " + i, "color:blue");
         console.log("# of Transactions: ", _block.data.data.length);
         console.log(" tx_id ", _block.data.data[0].payload.header.channel_header.tx_id);
         console.log("%c -------------", "color: blue");
@@ -86,7 +87,7 @@ async function writeBlocks(exportFile) {
         if (err) throw err;
     
         // success case, the file was saved
-        console.log('All Blocks Saved');
+        console.log('All Blocks Saved'.green.bold);
     });
 }
 

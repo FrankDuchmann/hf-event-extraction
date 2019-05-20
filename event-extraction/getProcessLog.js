@@ -13,16 +13,13 @@ let colors = require('colors');
 //    GLOBAL SETTINGS
 // =====================
 // file path to blocks.json, examples provided below
-let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-composer/data/vehicle-manufacture-network-blocks.json");
+let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-composer/data/vmn_blocks_error.json");
 //let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-fabric/data/blocks.json");
 //let filePathBlocks = path.join(__dirname + "/.." + "/connections/ibm-blockchain-platform/data/blocks.json")
 
 // file path to save process-log
-let fileNameProcessLog = "process-log-manufacture-vehicle-network.json";
+let fileNameProcessLog = "vmn_log_error.json";
 let filePathProcessLog = path.join(__dirname, "data", fileNameProcessLog);
-
-// Concat to existing Log
-let concatToLog = false;
 
 // Complex Event Definition
 let filePathComplexEventDefinition = path.join(__dirname, "event-definition.csv");
@@ -192,7 +189,6 @@ function extract_events() {
         console.log(("|        Block " + currentBlockNumber + "       |").white.bold);
         console.log("Inspecting Block " + currentBlockNumber + " [...]".white);
 
-        console.log(currentBlock.data.data.length.toString().red.bold);
         for (let l = 0; l < currentBlock.data.data.length; l++) {
             let currentBlockData = currentBlock.data.data[l];
             let timeStamp = currentBlockData.payload.header.channel_header.timestamp;
