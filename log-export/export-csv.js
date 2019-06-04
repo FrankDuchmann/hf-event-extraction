@@ -3,15 +3,15 @@
 // =====================
 //       CONFIG
 // =====================
-let processLogFileName = "vmn_log_error.json";
-let eventLogCSVName = "vmn_log_error.csv";
+let processLogFileName = "vmn_log.json";
+let eventLogCSVName = "vmn_log.csv";
 //let timeStampFormat = ""; //default
 let timeStampFormat = "DD.MM.YYYY HH.mm.ss"
 let sortParameter = ['key', 'timestamp', 'eventLevel1Id'];
 let csvEncoding = 'utf8'
 
 // MPM Config
-let mpmStyle = true;
+let mpmStyle = false;
 let mpmFileSuffix = "_mpm" 
 let startEventId = "0";
 let startEventName = "Start";

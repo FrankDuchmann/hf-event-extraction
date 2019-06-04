@@ -13,12 +13,12 @@ let colors = require('colors');
 //    GLOBAL SETTINGS
 // =====================
 // file path to blocks.json, examples provided below
-let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-composer/data/vmn_blocks_error.json");
+let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-composer/data/vmn_blocks.json");
 //let filePathBlocks = path.join(__dirname + "/.." + "/connections/hl-fabric/data/blocks.json");
 //let filePathBlocks = path.join(__dirname + "/.." + "/connections/ibm-blockchain-platform/data/blocks.json")
 
 // file path to save process-log
-let fileNameProcessLog = "vmn_log_error.json";
+let fileNameProcessLog = "vmn_log.json";
 let filePathProcessLog = path.join(__dirname, "data", fileNameProcessLog);
 
 // Complex Event Definition
@@ -151,25 +151,10 @@ function save_process_log() {
     console.log("");
     console.log('Save Process Log ...'.white.bold)
     console.time("File Saved in");
-    if (concatToLog == true) {
-        // concat 
-        let old_content = fs.readFileSync(filePathProcessLog);
-        let old_data = JSON.parse(old_content);
-        let complete_data = old_data.concat(processLog);
-        let json = JSON.stringify(complete_data);
-
-        fs.writeFileSync(filePathProcessLog, json, (err) => {
-            if (err) throw err;
-        });
-        console.log('Process Log Saved'.green.bold);
-    }
-    else {
-        // just override
-        fs.writeFileSync(filePathProcessLog, json, (err) => {
-            if (err) throw err;
-        });
-        console.log('Process Log Saved'.green.bold);
-    }
+    fs.writeFileSync(filePathProcessLog, json, (err) => {
+        if (err) throw err;
+    });
+    console.log('Process Log Saved'.green.bold);
     console.timeEnd("File Saved in");
     console.timeEnd("Total");
 }
@@ -275,7 +260,7 @@ function extract_events() {
                                     eventLevel2Id = getEventId(eventLevel2, eventLevel2Ids);
                                     // Level 3
                                     for (let k = 0; k < eventLevel3Stack.length; k++) {
-                                        eventLevel3Stack[k] = eventLevel3Stack[k][0] + ":" + shortenKey(eventLevel3Stack[k][1], shortenDelimiter, shortenKeep) + " > " + shortenKey(eventLevel3Stack[k][2], shortenDelimiter, shortenKeep);
+                                        eventLevel3Stack[k] = eventLevel3Stack[k][0] + ":" + shortenKey(eventLevel3Stack[k][2], shortenDelimiter, shortenKeep);
                                     }
                                     eventLevel3 = eventLevel3Stack.sort().join(', ');
                                     eventLevel3Id = getEventId(eventLevel3, eventLevel3Ids);
@@ -384,6 +369,26 @@ function extract_events() {
                                     console.log((" EventL1 " + eventLevel1).blue);
                                     console.log((" EventL2 " + eventLevel2).blue);
                                     console.log((" EventL3 " + eventLevel3).blue);
+
+                                    // Add Event to ProcessLog
+                                    processLog.push({
+                                        "key": id,
+                                        "timestamp": timeStamp,
+                                        "eventLevel1": eventLevel1,
+                                        "eventLevel1Id": eventLevel1Id,
+                                        "eventLevel2": eventLevel2,
+                                        "eventLevel2Id": eventLevel2Id,
+                                        "eventLevel3": eventLevel3,
+                                        "eventLevel3Id": eventLevel3Id,
+                                        "tx_id": transactionId,
+                                        "chaincode_id": nameSpace,
+                                        "block_number": currentBlockNumber,
+                                        "endorser": endorser,
+                                        "channelId": channelId,
+                                        "creatorMSP": creatorMSP,
+                                        "registryType": composer_registry_type, // optional
+                                        "assetClass": composer_registry_type_class // optional
+                                    });
 
                                 }
                             }

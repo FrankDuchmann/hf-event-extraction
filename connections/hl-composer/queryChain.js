@@ -14,7 +14,7 @@ const colors = require('colors');
 let channel;
 let json_path = __dirname;
 let connectionCard = "admin@vehicle-manufacture-network";
-let exportFileName = "vmn_blocks_error";
+let exportFileName = "vmn_blocks";
 
 
 // =====================
