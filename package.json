@@ -30,5 +30,10 @@
     "composer-client": "^0.20.7",
     "papaparse": "^4.6.3",
     "stream-json": "^1.1.4"
+  },
+  "dependencies": {
+    "array-sort": "^1.0.0",
+    "dataframe-js": "^1.4.1",
+    "request-promise": "^4.2.4"
   }
 }

@@ -4,6 +4,9 @@
 const BusinessNetworkConnection = require('composer-client').BusinessNetworkConnection;
 const AdminConnection = require('composer-admin').AdminConnection;
 const fs = require('fs');
+const colors = require('colors');
+
+
 
 // =====================
 //    GLOBAL SETTINGS
@@ -11,11 +14,8 @@ const fs = require('fs');
 let channel;
 let json_path = __dirname;
 let connectionCard = "admin@vehicle-manufacture-network";
+let exportFileName = "vmn_blocks";
 
-// Set export file
-var exportFile = {
-    blocks: []
- };
 
 // =====================
 //       FUNCTIONS
@@ -59,8 +59,10 @@ async function init() {
 
 // query all Blocks
 async function queryBlocks() {
+    let exportFile = {
+        blocks: []
+    };
     let query_response = await channel.queryInfo();
-    //console.log("Result", query_response);
     console.log("Blockchain is ", query_response.height.toString() , " blocks long");
     let latestBlockNumber = parseInt(query_response.height.toString());
 
@@ -68,26 +70,27 @@ async function queryBlocks() {
         let _block = await channel.queryBlock(i, false, false);
 
         console.log("%c -------------", "color: blue");
-        console.log("Block " + i,);
+        console.log("%c Block " + i, "color:blue");
         console.log("# of Transactions: ", _block.data.data.length);
         console.log(" tx_id ", _block.data.data[0].payload.header.channel_header.tx_id);
         console.log("%c -------------", "color: blue");
 
         exportFile.blocks.push(_block);
     }
-    writeBlocks();
+    writeBlocks(exportFile);
 }
 
-async function writeBlocks() {
+async function writeBlocks(exportFile) {
     var json = JSON.stringify(exportFile);
-    fs.writeFile(json_path + '/data/blocks.json', json, (err) => {  
+    fs.writeFile(json_path + '/data/' + exportFileName  + '.json', json, (err) => {  
         // throws an error, you could also catch it here
         if (err) throw err;
     
         // success case, the file was saved
-        console.log('All Blocks Saved');
+        console.log('All Blocks Saved'.green.bold);
     });
 }
+
 
 
 // =====================
