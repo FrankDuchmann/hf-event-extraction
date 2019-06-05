@@ -4,7 +4,11 @@ This project is developed during my master thesis at the Institute [AIFB](http:/
 
 ## What it does
 
-This project allows to extract meaningful events from a running [Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.4/) or [Hyperledger Composer](https://hyperledger.github.io/composer/latest/) instance and saves these event logs in process-log like structure to apply [process mining techniques](https://www.win.tue.nl/ieeetfpm/downloads/Process%20Mining%20Manifesto.pdf).
+This project allows to extract meaningful events from a running [Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.4/) or [Hyperledger Composer](https://hyperledger.github.io/composer/latest/) instance and saves these event logs in a process-log like structure to apply [process mining techniques](https://www.win.tue.nl/ieeetfpm/downloads/Process%20Mining%20Manifesto.pdf).
+
+| Smart Contract &rarr; | Event Log &rarr; | Process Model |
+| ------------- | ------------- | ------------- |
+| ![hyperledger composer](docs/composer.png?raw=true "composer") | ![log](docs/log.png?raw=true "log")  | ![disco](docs/disco_fuzzy_model.png?raw=true "disco_fuzzy_model")
 
 ---
 
